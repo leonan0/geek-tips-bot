@@ -1,6 +1,5 @@
 # ls bot.py | entr -r python bot.py
 from os import getenv
-from dotenv import load_dotenv
 from uvloop import install
 from pyrogram import Client, filters
 from pyrogram.types import Message
@@ -15,11 +14,9 @@ app = Client(
     bot_token=getenv('TELEGRAM_BOT_TOKEN')
 )
 
-
-load_dotenv()
 install()
 
-CHAT_ID = getenv('CHAT_ID'),
+CHAT_ID = getenv('CHAT_ID')
 
 RED = '\n❌❌❌❌❌❌❌❌❌\n❌❌❌❌❌❌❌❌❌\n❌❌❌❌❌❌❌❌❌\n'
 
