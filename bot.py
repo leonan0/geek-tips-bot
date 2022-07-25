@@ -1,21 +1,21 @@
-# ls bot.py | entr -r python bot.py
-from enum import Enum
-import json
 from os import getenv
-from re import L, M
 from dotenv import load_dotenv
 from uvloop import install
-from pyrogram import Client, filters
-from pyrogram.types import Message
+from pyrogram import Client, filters  # type: ignore
+from pyrogram.types import Message, ForceReply
 from pyrogram.types import (
-    InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
+    InlineKeyboardButton, InlineKeyboardMarkup
 )
 
+app = Client(
+    'geek_tips_testes_bot'
+)
 
+ALLOWED_USERS = ['leonan0', 'Leandr0Caetan0', 'JoaoAngelo11']
 load_dotenv()
 install()
 
-CHAT_ID = getenv('CHAT_ID'),
+CHAT_ID = '-700294387'
 
 RED = '\n❌❌❌❌❌❌❌❌❌\n❌❌❌❌❌❌❌❌❌\n❌❌❌❌❌❌❌❌❌\n'
 
@@ -30,11 +30,17 @@ MERCADOS = {
 }
 
 
+def validate_user(message):
+    if message.from_user.username in ALLOWED_USERS:
+        return True
+    else:
+        return False
+
+
 def set_message(campeonato, minutagem, mercado):
     minutos = 1
     try:
         campeonato = campeonato.upper()
-        minutagem = int(minutagem)
         minutos = [str(minutagem).rjust(2, '0'), str(minutagem+3 if minutagem+3 <= 59 else minutagem+3 -
                                                      60).rjust(2, '0'), str(minutagem+6 if minutagem+6 <= 59 else minutagem+6 - 60).rjust(2, '0')]
         mercado = MERCADOS[mercado]
@@ -65,7 +71,7 @@ def set_message(campeonato, minutagem, mercado):
 
 def get_message_result(message, result, minutagem, odd):
     lista = message.text.split('\n')
-    if result == "green":
+    if result == "GREEN":
         texto = lista[6].replace(minutagem, minutagem + " ✅")
     else:
         texto = lista[6].replace('/', "/")
@@ -74,21 +80,49 @@ def get_message_result(message, result, minutagem, odd):
 
     lista.insert(6, texto)
 
-    lista.insert(8, f"ODD @{odd}{GREEN}" if result == 'green' else RED)
+    lista.insert(8, f"ODD @{odd}{GREEN}" if result == 'GREEN' else RED)
 
-    return lista
+    message_to_send = ''
+
+    for i in lista:
+        if i == '':
+            message_to_send += '\n'
+        else:
+            message_to_send += i+'\n'
+
+    return message_to_send
 
 
-app = Client(
-    'GeekTipsBot',
-    api_id=getenv('TELEGRAM_API_ID'),
-    api_hash=getenv('TELEGRAM_API_HASH'),
-    bot_token=getenv('TELEGRAM_BOT_TOKEN')
-)
+def log(message):
+    print(f"""username -> {message.from_user.username if message.from_user else None},\nuser.id -> {message.from_user.id if message.from_user else None},\nchat.id -> {message.chat.id},\ncommand -> {message.command}""")
+
+
+@app.on_message(filters.command('post'))
+async def post(client, message):
+    log(message)
+    if validate_user(message):
+        camp, min, mercado = message.command[1].split(',')
+        message_to_rpl, minutos = set_message(camp, int(min), mercado)
+
+        keys = [InlineKeyboardButton(
+            'RED', callback_data=f"RED")]
+        for a in minutos:
+            keys.append(InlineKeyboardButton(
+                'GREEN on '+str(a), callback_data=f'GREEN,{a}'),)
+
+        inline_markup = InlineKeyboardMarkup(
+            [
+                keys
+            ]
+        )
+
+        await message.reply(message_to_rpl, reply_markup=inline_markup)
 
 
 @app.on_message(filters.command('mercados'))
 async def get_mercados(client, message):
+    log(message)
+
     message_r = ''
     for m in MERCADOS.keys():
         message_r += f'{m} -> {MERCADOS[m]}\n'
@@ -98,12 +132,16 @@ async def get_mercados(client, message):
 
 @app.on_message(filters.command('start'))
 async def start(client, message):
+    log(message)
+
     print(message)
     await message.reply('Bem vindo!')
 
 
 @app.on_message(filters.regex('green*') | filters.regex('red'))
 async def edit_message_text(client, message):
+    log(message)
+
     result, message_id, mins, odd = message.text.split(',')
     message_id = int(message_id)
     message_to_edit = await app.get_messages(CHAT_ID, message_id)
@@ -122,54 +160,24 @@ async def edit_message_text(client, message):
 
 @app.on_callback_query()
 async def callback(client, callback_query):
-    if 'green' in callback_query.data:
+    r = callback_query.data.split(',')
+    if r[0] == 'RED':
         pass
     else:
-        pass
-
-    r = await callback_query.edit_message_text('Teste', reply_markup="inline_markup")
-
-
-@app.on_message(filters.command('callback'))
-async def callbacks(client, message):
-    inline_markup = InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton('green', callback_data='green'),
-                InlineKeyboardButton(
-                    'red', callback_data='red')
-            ]
-        ]
-    )
-    await message.reply('Escolha algo!', reply_markup=inline_markup)
+        h = await callback_query.message.reply_text(f"Qual a ODD? | {r[0]},{r[1]}", reply_to_message_id=callback_query.message.id, reply_markup=ForceReply())
+        print(h.id)
 
 
-@app.on_message()
-async def hello(client, message: Message):
-    if message.from_user.username in ['leonan0', 'Leandr0Caetan0', 'JoaoAngelo11']:
-        try:
-            camp, mins, entrada = message.text.split(',')
-            message_reply, minutos = set_message(camp, mins, entrada)
-            print(message.from_user)
-            await message.reply(message_reply)
-            c = await app.send_message(CHAT_ID, message_reply)
-            await message.reply(str(c.id))
-            keys = [InlineKeyboardButton('RED', callback_data=f"RED,{c.id}")]
-            for a in minutos:
-                keys.append(InlineKeyboardButton(
-                    'GREEN on '+str(a), callback_data=f'green,{a},{c.id}'),)
+@app.on_message(filters.reply)
+async def testes(client, message):
+    odd = message.text
 
-            inline_markup = InlineKeyboardMarkup(
-                [
-                    keys
-                ]
-            )
-            # await message.reply('Escolha algo!', reply_markup=inline_markup)
-
-        except Exception as ex:
-            print("Não entendi"+str(ex))
-    else:
-        await message.reply('Você ta sem moral')
+    odd_question = message.reply_to_message
+    x = message.reply_to_message.text.split('| ')[1].split(',')
+    x.append(odd)
+    tip_message = await app.get_messages(message.chat.id, odd_question.reply_to_message_id)
+    edited_message = get_message_result(tip_message, x[0], x[1], x[2])
+    await app.edit_message_text(tip_message.chat.id, tip_message.id, edited_message)
 
 
 print('running!!!')
