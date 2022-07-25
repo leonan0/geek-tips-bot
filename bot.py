@@ -4,7 +4,7 @@ import json
 from os import getenv
 from re import L, M
 from dotenv import load_dotenv
-# from uvloop import install
+from uvloop import install
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from pyrogram.types import (
@@ -13,7 +13,7 @@ from pyrogram.types import (
 
 
 load_dotenv()
-# install()
+install()
 
 CHAT_ID = '-667708596'
 
