@@ -1,21 +1,29 @@
 from os import getenv
 from dotenv import load_dotenv
-from uvloop import install
-from pyrogram import Client, filters  # type: ignore
-from pyrogram.types import Message, ForceReply
+from pyrogram import Client, filters  
+from pyrogram.types import ForceReply
 from pyrogram.types import (
     InlineKeyboardButton, InlineKeyboardMarkup
 )
 
-app = Client(
-    'geek_tips_testes_bot'
-)
+from dotenv import load_dotenv
+from os import getenv
+from uvloop import install
 
-ALLOWED_USERS = ['leonan0', 'Leandr0Caetan0', 'JoaoAngelo11']
 load_dotenv()
 install()
 
-CHAT_ID = '-700294387'
+CHAT_ID = getenv('CHAT_ID'),
+
+app = Client(
+    'GeekTipsBot',
+    api_id=getenv('TELEGRAM_API_ID'),
+    api_hash=getenv('TELEGRAM_API_HASH'),
+    bot_token=getenv('TELEGRAM_BOT_TOKEN')
+)
+
+
+ALLOWED_USERS = ['leonan0', 'Leandr0Caetan0', 'JoaoAngelo11']
 
 RED = '\n❌❌❌❌❌❌❌❌❌\n❌❌❌❌❌❌❌❌❌\n❌❌❌❌❌❌❌❌❌\n'
 
