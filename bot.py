@@ -15,7 +15,7 @@ from pyrogram.types import (
 load_dotenv()
 install()
 
-CHAT_ID = '-667708596'
+CHAT_ID = getenv('CHAT_ID'),
 
 RED = '\n❌❌❌❌❌❌❌❌❌\n❌❌❌❌❌❌❌❌❌\n❌❌❌❌❌❌❌❌❌\n'
 
