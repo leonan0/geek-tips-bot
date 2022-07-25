@@ -1,14 +1,11 @@
 # ls bot.py | entr -r python bot.py
-from enum import Enum
-import json
 from os import getenv
-from re import L, M
 from dotenv import load_dotenv
 from uvloop import install
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from pyrogram.types import (
-    InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
+    InlineKeyboardButton, InlineKeyboardMarkup
 )
 
 app = Client(
