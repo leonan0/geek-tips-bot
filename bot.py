@@ -1,4 +1,5 @@
 # ls bot.py | entr -r python bot.py
+from dotenv import load_dotenv
 from os import getenv
 from uvloop import install
 from pyrogram import Client, filters
@@ -7,6 +8,9 @@ from pyrogram.types import (
     InlineKeyboardButton, InlineKeyboardMarkup
 )
 
+load_dotenv()
+install()
+
 app = Client(
     'GeekTipsBot',
     api_id=getenv('TELEGRAM_API_ID'),
@@ -14,7 +18,6 @@ app = Client(
     bot_token=getenv('TELEGRAM_BOT_TOKEN')
 )
 
-install()
 
 CHAT_ID = getenv('CHAT_ID')
 
