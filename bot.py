@@ -51,7 +51,7 @@ def set_message(campeonato, minutagem, mercado):
                           "\n",
                           f"🕒 {minutos[0]} / {minutos[1]} / {minutos[2]}\n",
                           "\n",
-                          "ENTRADA:",
+                          "ENTRADA: ",
                           f"{mercado}\n",
                           "\n",
                           "Stakes: 1 % -> 2 % -> 4 % da Banca\n",
